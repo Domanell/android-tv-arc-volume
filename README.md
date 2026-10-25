@@ -28,7 +28,8 @@ Tested on a TCL 55C7K with a Sony HT-S350.
    [Releases](https://github.com/Domanell/android-tv-arc-volume/releases).
 2. Install it on the TV, for example from a USB stick with a file manager, or with Downloader or
    Send Files to TV.
-3. Open **ARC Volume** and allow **Display over other apps** when asked.
+3. Open **ARC Volume** and select **Allow**. In the list of apps that opens, find ARC Volume,
+   turn it on and press Back.
 4. Press Back. The app keeps running in the background.
 
 To update, install the new APK over the old one. Settings are kept.

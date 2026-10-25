@@ -1,6 +1,7 @@
 package io.github.domanell.arcvolume;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -29,6 +30,8 @@ public class MainActivity extends Activity {
     private Ui.Row stepRow;
     private Ui.Row permissionsRow;
     private Ui.Row previewRow;
+    /** The overlay permission was offered once since this screen was created. */
+    private boolean overlayAsked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +51,7 @@ public class MainActivity extends Activity {
 
         allowRow = Ui.row(this, "Allow display over other apps",
                 v -> SystemScreens.openOverlaySettings(this));
-        allowRow.setSummary("Turn on ARC Volume, then press Back to return here");
+        allowRow.setSummary("In the list of apps, find ARC Volume and turn it on, then press Back");
         Ui.add(column, allowRow.view, 20);
 
         positionRow = Ui.row(this, "Position and size",
@@ -68,13 +71,18 @@ public class MainActivity extends Activity {
 
     /**
      * Runs on start and on return from another screen: starts the service if the system has
-     * stopped it, then updates text in place so focus stays put.
+     * stopped it, offers the overlay permission the first time it is missing, then updates text
+     * in place so focus stays put.
      */
     @Override
     protected void onResume() {
         super.onResume();
         if (VolumeService.state(this) == VolumeService.STOPPED) {
             VolumeService.start(this, "launcher");
+        }
+        if (!overlayAsked && !Settings.canDrawOverlays(this)) {
+            overlayAsked = true;
+            offerOverlayPermission();
         }
         refresh();
         refreshSoon();
@@ -132,6 +140,18 @@ public class MainActivity extends Activity {
     private void refreshSoon() {
         handler.removeCallbacks(refreshRunnable);
         handler.postDelayed(refreshRunnable, STATUS_DELAY_MS);
+    }
+
+    private void offerOverlayPermission() {
+        new AlertDialog.Builder(this)
+                .setTitle("Allow display over other apps")
+                .setMessage("ARC Volume needs this permission to show the volume level on top of "
+                        + "what you watch.\n\nThe next screen lists apps that may display over "
+                        + "other apps. Find ARC Volume in the list, press OK to turn it on, then press "
+                        + "Back to return here.")
+                .setPositiveButton("Allow", (dialog, which) -> SystemScreens.openOverlaySettings(this))
+                .setNegativeButton("Not now", null)
+                .show();
     }
 
     private void showPreview() {
