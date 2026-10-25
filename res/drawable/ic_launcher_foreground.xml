@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Speaker with two sound waves, inside the 66 dp safe zone of the 108 dp adaptive icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M38,48 L46,48 L56,38 L56,70 L46,60 L38,60 Z" />
+    <path
+        android:pathData="M60.5,48.64 A7,7 0 0,1 60.5,59.36"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M65,43.28 A14,14 0 0,1 65,64.72"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+</vector>
