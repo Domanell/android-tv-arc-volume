@@ -2,3 +2,10 @@ build/
 *.keystore
 *.jks
 keys/
+
+# IDE
+.idea/
+*.iml
+
+# macOS
+.DS_Store

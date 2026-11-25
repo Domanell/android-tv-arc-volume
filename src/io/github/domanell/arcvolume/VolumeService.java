@@ -295,7 +295,8 @@ public class VolumeService extends Service {
                         + " learning=" + learning);
             }
         } else if (AppSettings.KEY_RIGHT_DP.equals(key) || AppSettings.KEY_TOP_DP.equals(key)
-                || AppSettings.KEY_SCALE.equals(key)) {
+                || AppSettings.KEY_SCALE.equals(key) || AppSettings.KEY_BAR.equals(key)
+                || AppSettings.KEY_BAR_MAX.equals(key)) {
             applyPlacement();
         }
     }
@@ -316,14 +317,19 @@ public class VolumeService extends Service {
         applyPlacement();
     }
 
-    /** Moves and scales the badge to the saved settings, keeping it fully on screen. */
+    /**
+     * Moves and scales the badge and sets up its bar from the saved settings, keeping it fully
+     * on screen.
+     */
     private void applyPlacement() {
         int scale = AppSettings.scale(this);
+        boolean bar = AppSettings.bar(this);
         Rect screen = windows.getMaximumWindowMetrics().getBounds();
         Rect frame = VolumeBadgeView.frame(screen.width(), screen.height(),
                 getResources().getDisplayMetrics().density,
-                AppSettings.rightDp(this), AppSettings.topDp(this), scale);
+                AppSettings.rightDp(this), AppSettings.topDp(this), scale, bar);
         badge.setScale(scale);
+        badge.setBar(bar, AppSettings.barMax(this));
         layoutParams.x = frame.left;
         layoutParams.y = frame.top;
         if (overlayAdded) {

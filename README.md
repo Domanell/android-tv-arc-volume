@@ -17,6 +17,7 @@ as a number right under the TV's own volume panel, and hides it together with th
 - Shows a crossed-out speaker when the sound is muted.
 - Fits the TCL Google TV volume panel out of the box; you can move the box and change its size
   for any other TV.
+- Can show its own vertical volume bar for TVs that hide the volume panel completely.
 - Detects by itself how many levels your soundbar moves per press (for example 2 on a Sony
   HT-S350), so the number is right without any setup.
 - Has no ads, no accounts, no internet access and no tracking. It is free and open source.
@@ -50,10 +51,15 @@ Some TVs, TCL among them, do not let apps start by themselves after a restart. C
 
 Open **ARC Volume** from the app list.
 
-- **Position and size:** select **Position** and move the box with the arrows (hold an arrow to
-  move faster), then press OK. Use Left/Right on **Scale** to make it bigger or smaller.
+- **Position, size and bar:** select **Position** and move the box with the arrows (hold an
+  arrow to move faster), then press OK. Use Left/Right on **Scale** to make it bigger or smaller.
   **Reset to default** puts it back under the TCL panel. While you are here, you can press the
   volume buttons to compare with the TV's own panel.
+- **Volume bar:** some TVs (for example some Xiaomi models) hide their own volume panel
+  completely while a soundbar is connected, so only the number is left. Turn on **Volume bar**
+  to show a vertical bar above the number, in the place of the TCL panel. Off by default. Set
+  **Bar maximum** with Left/Right to your soundbar's highest level (for example 50 or 100), so a
+  full bar means full volume.
 - **Volume step:** how many levels the soundbar moves per press. **Automatic step** is on by
   default. If the number is often wrong for a moment, select
   **Measure step now** and press Volume up three times, pausing after each press. You can also
