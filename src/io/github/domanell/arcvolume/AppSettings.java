@@ -2,10 +2,11 @@ package io.github.domanell.arcvolume;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.provider.Settings;
 
 /**
- * Saved app settings: badge position and scale, the soundbar step and its mode, and what the
+ * Saved app settings: badge position, scale and volume bar, the soundbar step and its mode, and what the
  * app has seen of auto-start. Shared by the service and the app screens, which run in one
  * process, so the service picks up changes through a preference listener.
  */
@@ -21,6 +22,10 @@ final class AppSettings {
     /** Badge top edge, in dp below the vertical screen center (negative is above). */
     static final String KEY_TOP_DP = "badge_top_dp";
     static final String KEY_SCALE = "badge_scale_percent";
+    /** Show a vertical volume bar above the number, for TVs that hide their own panel. */
+    static final String KEY_BAR = "bar_enabled";
+    /** Soundbar level that fills the bar; defaults to the stream maximum. */
+    static final String KEY_BAR_MAX = "bar_max";
 
     /** Boot count of the last boot whose BOOT_COMPLETED reached the app. */
     static final String KEY_BOOT_BROADCAST = "started_at_boot";
@@ -68,6 +73,22 @@ final class AppSettings {
     static int scale(Context context) {
         int scale = prefs(context).getInt(KEY_SCALE, DEFAULT_SCALE);
         return Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale));
+    }
+
+    static boolean bar(Context context) {
+        return prefs(context).getBoolean(KEY_BAR, false);
+    }
+
+    /** Highest level the stream reports; the bar maximum can not go above it. */
+    static int streamMax(Context context) {
+        return context.getSystemService(AudioManager.class)
+                .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+    }
+
+    static int barMax(Context context) {
+        int streamMax = streamMax(context);
+        int max = prefs(context).getInt(KEY_BAR_MAX, streamMax);
+        return Math.max(1, Math.min(streamMax, max));
     }
 
     static boolean defaultPosition(Context context) {

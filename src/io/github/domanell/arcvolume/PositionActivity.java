@@ -11,13 +11,15 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * Position and size editor. A sample badge showing 42 sits at its real overlay coordinates.
+ * Position, size and volume bar editor. A sample badge showing 42 sits at its real overlay
+ * coordinates.
  * Like TV settings, every change is saved at once and Back just leaves the screen.
  *
  * <p>The panel is one vertical list, so Up/Down is the only focus movement. Left/Right on the
  * Scale row change the scale. OK on Position enters movement mode: the panel hides, the arrows
  * move the badge, OK saves the new position and Back puts the badge back where the move
- * started. The panel sits on the side of the screen away from the badge.
+ * started. The panel sits on the side of the screen away from the badge. Left/Right on Bar
+ * maximum set the level that fills the volume bar.
  */
 public class PositionActivity extends Activity {
     private static final int SAMPLE_VOLUME = 42;
@@ -28,10 +30,15 @@ public class PositionActivity extends Activity {
     private TextView moveHint;
     private Ui.Row positionRow;
     private Ui.Row scaleRow;
+    private Ui.Row barRow;
+    private Ui.Row barMaxRow;
 
     private int rightDp;
     private int topDp;
     private int scale;
+    private boolean bar;
+    private int barMax;
+    private int streamMax;
     private boolean moving;
     private int moveStartRightDp;
     private int moveStartTopDp;
@@ -42,6 +49,9 @@ public class PositionActivity extends Activity {
         rightDp = AppSettings.rightDp(this);
         topDp = AppSettings.topDp(this);
         scale = AppSettings.scale(this);
+        bar = AppSettings.bar(this);
+        barMax = AppSettings.barMax(this);
+        streamMax = AppSettings.streamMax(this);
 
         root = new FrameLayout(this);
         root.setBackgroundColor(Ui.BACKGROUND);
@@ -58,7 +68,7 @@ public class PositionActivity extends Activity {
         int pad = Ui.dp(this, 24);
         panel.setPadding(pad, pad, pad, pad);
         panel.setBackgroundColor(Ui.PANEL);
-        Ui.add(panel, Ui.heading(this, "Position and size"), 0);
+        Ui.add(panel, Ui.heading(this, "Position, size and bar"), 0);
 
         positionRow = Ui.row(this, "Position", v -> startMoving());
         Ui.add(panel, positionRow.view, 16);
@@ -67,6 +77,12 @@ public class PositionActivity extends Activity {
         Ui.Row resetRow = Ui.row(this, "Reset to default", v -> reset());
         resetRow.setSummary("Under the TCL volume panel, 100%");
         Ui.add(panel, resetRow.view, 8);
+        barRow = Ui.switchRow(this, "Volume bar", v -> toggleBar());
+        barRow.setSummary("For TVs that hide their own volume panel");
+        Ui.add(panel, barRow.view, 8);
+        barMaxRow = Ui.stepperRow(this, "Bar maximum", this::changeBarMax);
+        barMaxRow.setSummary("Soundbar level that fills the bar");
+        Ui.add(panel, barMaxRow.view, 8);
 
         Ui.add(panel, Ui.hint(this, "Press Volume to compare with the TV's own volume panel."), 16);
 
@@ -163,6 +179,18 @@ public class PositionActivity extends Activity {
         save();
     }
 
+    private void toggleBar() {
+        bar = !bar;
+        update();
+        save();
+    }
+
+    private void changeBarMax(int direction) {
+        barMax = VolumeBadgeView.clamp(barMax + direction, 1, streamMax);
+        update();
+        save();
+    }
+
     private void startMoving() {
         moving = true;
         moveStartRightDp = rightDp;
@@ -200,6 +228,8 @@ public class PositionActivity extends Activity {
                 .putInt(AppSettings.KEY_RIGHT_DP, rightDp)
                 .putInt(AppSettings.KEY_TOP_DP, topDp)
                 .putInt(AppSettings.KEY_SCALE, scale)
+                .putBoolean(AppSettings.KEY_BAR, bar)
+                .putInt(AppSettings.KEY_BAR_MAX, barMax)
                 .apply();
     }
 
@@ -209,13 +239,14 @@ public class PositionActivity extends Activity {
         float density = getResources().getDisplayMetrics().density;
         int width = VolumeBadgeView.sizePx(VolumeBadgeView.WIDTH_DP, scale, density);
         int height = VolumeBadgeView.sizePx(VolumeBadgeView.HEIGHT_DP, scale, density);
+        int barOffset = VolumeBadgeView.sizePx(VolumeBadgeView.barOffsetDp(bar), scale, density);
         rightDp = VolumeBadgeView.clamp(rightDp, 0, (int) ((screen.width() - width) / density));
         int halfHeightDp = (int) (screen.height() / 2 / density);
-        topDp = VolumeBadgeView.clamp(topDp, -halfHeightDp,
+        topDp = VolumeBadgeView.clamp(topDp, -halfHeightDp + (int) Math.ceil(barOffset / density),
                 (int) ((screen.height() / 2 - height) / density));
 
         Rect frame = VolumeBadgeView.frame(screen.width(), screen.height(), density,
-                rightDp, topDp, scale);
+                rightDp, topDp, scale, bar);
         int[] origin = new int[2];
         root.getLocationOnScreen(origin);
         FrameLayout.LayoutParams badgeParams = (FrameLayout.LayoutParams) badge.getLayoutParams();
@@ -223,6 +254,7 @@ public class PositionActivity extends Activity {
         badgeParams.topMargin = frame.top - origin[1];
         badge.setLayoutParams(badgeParams);
         badge.setScale(scale);
+        badge.setBar(bar, barMax);
 
         boolean badgeOnLeft = frame.centerX() < screen.width() / 2;
         int margin = Ui.dp(this, 48);
@@ -244,5 +276,9 @@ public class PositionActivity extends Activity {
         positionRow.setSummary((defaultPosition ? "Default" : "Custom") + ". Press OK to move.");
         scaleRow.setValue(Ui.stepperValue(scale + "%",
                 scale > AppSettings.MIN_SCALE, scale < AppSettings.MAX_SCALE));
+        barRow.toggle.setChecked(bar);
+        barMaxRow.setEnabled(bar);
+        barMaxRow.setValue(bar ? Ui.stepperValue(String.valueOf(barMax),
+                barMax > 1, barMax < streamMax) : String.valueOf(barMax));
     }
 }

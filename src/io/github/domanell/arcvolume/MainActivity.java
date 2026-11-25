@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
         allowRow.setSummary("In the list of apps, find ARC Volume and turn it on, then press Back");
         Ui.add(column, allowRow.view, 20);
 
-        positionRow = Ui.row(this, "Position and size",
+        positionRow = Ui.row(this, "Position, size and bar",
                 v -> startActivity(new Intent(this, PositionActivity.class)));
         Ui.add(column, positionRow.view, 20);
         stepRow = Ui.row(this, "Volume step",
@@ -117,7 +117,8 @@ public class MainActivity extends Activity {
         }
 
         positionRow.setSummary((AppSettings.defaultPosition(this)
-                ? "Default position" : "Custom position") + ", " + AppSettings.scale(this) + "%");
+                ? "Default position" : "Custom position") + ", " + AppSettings.scale(this) + "%"
+                + (AppSettings.bar(this) ? ", volume bar" : ""));
         int step = AppSettings.step(this);
         stepRow.setSummary((AppSettings.stepManual(this) ? "Manual" : "Automatic") + ", "
                 + (step == VolumePredictor.UNKNOWN
